@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -12,8 +12,9 @@ import type { Menu, MenuCategory, MenuItem } from '@/types'
 import { formatPrice, generateSlug } from '@/lib/utils'
 import { seedSampleData } from '@/app/actions/seed'
 
-export default function EditMenuPage({ params }: { params: Promise<{ menu_id: string }> }) {
-  const { menu_id } = require('react').use(params as any) as { menu_id: string }
+export default function EditMenuPage() {
+  const params = useParams()
+  const menu_id = params.menu_id as string
   const router = useRouter()
   const supabase = createClient()
 
