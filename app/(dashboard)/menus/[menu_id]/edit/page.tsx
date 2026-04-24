@@ -6,10 +6,11 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Plus, Trash2, Loader2, Save, GripVertical,
-  ChevronDown, ChevronUp, Image as ImageIcon, Eye, EyeOff, Copy
+  ChevronDown, ChevronUp, Image as ImageIcon, Eye, EyeOff, Copy, Sparkles
 } from 'lucide-react'
 import type { Menu, MenuCategory, MenuItem } from '@/types'
 import { formatPrice, generateSlug } from '@/lib/utils'
+import { seedSampleData } from '@/app/actions/seed'
 
 export default function EditMenuPage({ params }: { params: Promise<{ menu_id: string }> }) {
   const { menu_id } = require('react').use(params as any) as { menu_id: string }
@@ -21,6 +22,7 @@ export default function EditMenuPage({ params }: { params: Promise<{ menu_id: st
   const [items, setItems] = useState<Record<string, MenuItem[]>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [seeding, setSeeding] = useState(false)
   const [message, setMessage] = useState('')
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set())
 
@@ -148,6 +150,19 @@ export default function EditMenuPage({ params }: { params: Promise<{ menu_id: st
     }
   }
 
+  const handleSeedData = async () => {
+    setSeeding(true)
+    const result = await seedSampleData(menu_id)
+    if (result?.error) {
+      alert(result.error)
+    } else {
+      setMessage('Sample data added!')
+      setTimeout(() => setMessage(''), 3000)
+      loadData()
+    }
+    setSeeding(false)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -168,6 +183,14 @@ export default function EditMenuPage({ params }: { params: Promise<{ menu_id: st
         </Link>
         <div className="flex items-center gap-3">
           {message && <span className="text-green-600 font-medium text-sm">{message}</span>}
+          <button
+            onClick={handleSeedData}
+            disabled={seeding}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-purple-200 text-purple-700 hover:bg-purple-50 transition-all disabled:opacity-50 text-sm"
+          >
+            {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {seeding ? 'Adding...' : 'Add Sample Data'}
+          </button>
           <button onClick={saveMenu} disabled={saving} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-all disabled:opacity-50">
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save'}
